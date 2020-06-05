@@ -2,7 +2,7 @@ const express = require('express')
 const router = express.Router()
 const Book = require('../models/book')
 const Author = require('../models/author')
-const imageMimeTypes = ['image/jpeg', 'image/png', 'image/gif']
+const imageMimeTypes = ['image/jpeg', 'image/png', 'images/gif']
 
 // All Books Route
 router.get('/', async (req, res) => {
@@ -34,7 +34,7 @@ router.get('/new', async (req, res) => {
 
 // Create Book Route
 router.post('/', async (req, res) => {
-  const book = new Book ({
+  const book = new Book({
     title: req.body.title,
     author: req.body.author,
     publishDate: new Date(req.body.publishDate),
@@ -54,7 +54,9 @@ router.post('/', async (req, res) => {
 // Show Book Route
 router.get('/:id', async (req, res) => {
   try {
-    const book = await Book.findById(req.params.id).populate('author').exec()
+    const book = await Book.findById(req.params.id)
+                           .populate('author')
+                           .exec()
     res.render('books/show', { book: book })
   } catch {
     res.redirect('/')
@@ -82,7 +84,7 @@ router.put('/:id', async (req, res) => {
     book.publishDate = new Date(req.body.publishDate)
     book.pageCount = req.body.pageCount
     book.description = req.body.description
-    if (req.body.cover != null && req.body.cover != '') {
+    if (req.body.cover != null && req.body.cover !== '') {
       saveCover(book, req.body.cover)
     }
     await book.save()
@@ -91,12 +93,12 @@ router.put('/:id', async (req, res) => {
     if (book != null) {
       renderEditPage(res, book, true)
     } else {
-      res.redirect('/')
+      redirect('/')
     }
   }
 })
 
-//Delete Book
+// Delete Book Page
 router.delete('/:id', async (req, res) => {
   let book
   try {
@@ -144,7 +146,7 @@ async function renderFormPage(res, book, form, hasError = false) {
 }
 
 function saveCover(book, coverEncoded) {
-  if (coverEncoded == null) {return}
+  if (coverEncoded == null) return
   const cover = JSON.parse(coverEncoded)
   if (cover != null && imageMimeTypes.includes(cover.type)) {
     book.coverImage = new Buffer.from(cover.data, 'base64')
